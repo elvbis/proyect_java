@@ -1,25 +1,34 @@
 pipeline {
-  agent any
+    agent any
+    tools{
+          maven 'maven_3_5_0'
+        }
+        stages {
+            stage('Build') {
 
-  stages {
-    stage('Build') {
-      steps {
-        echo 'Building...'
-      }
-    }
-    stage('Test') {
-      steps {
-        echo 'Testing...'
-        snykSecurity(
-          snykInstallation: 'snyk@latest',
-          snykTokenId: 'organisation-snyk-api-token', targetFile: 'pom.xml'
-        )
-      }
-    }
-    stage('Deploy') {
-      steps {
-        echo 'Deploying...'
-      }
-    }
-  }
-}	
+                    steps {
+                        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/elbvis/proyect_java.git']])
+						sh 'mvn clean install -DskipTests -P dev'
+						archiveArtifacts artifacts: 'target/*.jar'
+                    }
+            }
+        stage('Snyk'){
+            steps {
+                script {
+                    snykSecurity organisation: 'elbvis', projectName: '${JOB_NAME}', 
+                     severity: 'high', snykInstallation: 'snyk@latest', 
+                     snykTokenId: 'organisation-snyk-api-token', targetFile: 'pom.xml'
+                }
+            }
+        }
+
+   stage('SonarQube') {
+                steps {
+                     withSonarQubeEnv('sonarqube') { sh "mvn sonar:sonar"}
+                     archiveArtifacts artifacts: 'target/*.jar'
+
+                    }
+                }
+
+        }
+}
