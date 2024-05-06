@@ -16,7 +16,7 @@ pipeline {
         stage('Snyk'){
             steps {
                 script {
-                    snykSecurity organisation: 'elbvis', projectName: '${JOB_NAME}', 
+                    snykSecurity organisation: 'elvbis', projectName: '${JOB_NAME}', 
                      severity: 'high', snykInstallation: 'snyk@latest', 
                      snykTokenId: 'organisation-snyk-api-token', targetFile: 'pom.xml'
                 }
