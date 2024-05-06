@@ -13,8 +13,17 @@ pipeline {
 						archiveArtifacts artifacts: 'target/*.jar'
                     }
             }
-
-            stage('SonarQube') {
+        stage('Snyk'){
+            steps {
+                script {
+                    snykSecurity organisation: 'elbvis', projectName: '${JOB_NAME}', 
+                     severity: 'high', snykInstallation: 'snyk@latest', 
+                     snykTokenId: 'organisation-snyk-api-token', targetFile: 'pom.xml'
+                }
+            }
+        }
+           
+   stage('SonarQube') {
                 steps {
                      withSonarQubeEnv('sonarqube') { sh "mvn sonar:sonar"}
                      archiveArtifacts artifacts: 'target/*.jar'
